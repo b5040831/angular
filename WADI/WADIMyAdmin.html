@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html ng-app="WADIapp">
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+		<link rel="stylesheet" href="assets/css/bootstrap.css" type="text/css">
+	</head>
+	<body ng-controller="appController">
+	
+	<p ng-show="visible">This content will be visible only if you are logged on</p>
+	
+	<form name="loginForm">
+	<input type="text" ng-model="username" placeholder="Enter Username" required>
+	<input type="password" ng-model="password" required>
+	<button ng-click="login()" type="submit">Login</button>
+	</form>
+	
+    <script src="Assets/js/app/app.js"></script>
+    <script src="Assets/js/app/appAssets/appModule.js"></script>
+    <script src="Assets/js/app/appAssets/appController.js"></script>
+ 
+	</body>
+</html>

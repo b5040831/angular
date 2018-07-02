@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html ng-app="WADIapp">
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+		<link rel="stylesheet" href="assets/css/bootstrap.css" type="text/css">
+		<style>
+		body{background-image: url("Assets/img/index_bg.jpg");  background-repeat: no-repeat}
+		</style>
+	</head>
+	<body ng-controller="appController">
+	<!-- Container in which all the website is placed-->
+	<div class="container">
+	<!-- Login form-->
+	<form class="form-horizontal" ng-show="isLoginFormVisible" name="loginForm" style="background-color:#fff">
+		<div class="jumbotron" style="background-color:#fff;">
+			<h2>Login</h2>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2">Login</label>
+			<div class="col-sm-8">
+				<input type="text" ng-model="username" placeholder="Enter Username" required>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2">Password</label>
+			<div class="col-sm-8">
+				<input type="password" ng-model="password" placeholder="Enter Password" required>
+			</div>
+		</div>
+		<div class="form-group" style="margin-bottom:0"> 
+			<div class="col-sm-offset-2 col-sm-10">
+				<button ng-click="login()" type="submit" class="btn btn-success">Login</button>
+			</div>
+		</div>
+	</form>
+		
+	<!-- All Page content that is displayed after authentication apart from the footer-->
+	<div ng-show="isUserAuthenticated">
+		<!-- Navigation -->
+    	<div class="nav" style="background-color:#fff;">
+	    	<div class="nav-tabs">
+				<a ng-click="showIndexController()" class="btn btn-default" >Home</a>
+				<a ng-click="showBookingsController()" class="btn btn-default" >Bookings</a>
+				<a ng-click="showVehiclesController()" class="btn btn-default" >Vehicles</a>
+				<a ng-click="showAddBookingFormController()"  ng-show="showAddBookingButton" class="btn btn-info" style="float:right; margin-right: 20px" >Add new booking</a>
+				<a ng-click="CancelBookingButtonController()" ng-show="showCancelAddBookingButton" class="btn btn-warning" style="float:right; margin-right: 20px" >Cancel new booking</a>
+				<span ng-show="contentIsNotVisibleForStaff">
+				<a ng-click="showAddVehicleFormController()"  ng-show="showAddVehicleButton" class="btn btn-info" style="float:right; margin-right: 20px" >Add new vehicle</a>
+				</span>
+				<a ng-click="CancelVehicleButtonController()" ng-show="showCancelAddVehicleButton" class="btn btn-warning" style="float:right; margin-right: 20px" >Cancel new vehicle</a>
+				<input ng-show="showSearchBar" type="text" style="float:right; margin-right: 20px" placeholder="Search" ng-model="search">				
+	    	</div>
+	   	</div>
+		</span>
+	
+		
+	    <div ng-show="errorMessage">{{errorMessage | json}}</div>
+		
+		<!-- Home Page-->
+		<div ng-show="isIndexVisible"  style="background-color:#fff;">
+			<div class="jumbotron" style="background-color:#fff;">
+				<h2>National Car Pool Company Administration Page</h2>
+			</div>
+			<h4 style="margin:0; padding-left:10px">Hello {{userFullName}} your role is: {{userRole}}</h4> <br />
+		</div>
+		
+		<!-- Bookings Page-->
+		<div ng-show="isBookingsVisible" style="background-color:#fff;">
+			<div class="jumbotron" style="background-color:#fff;">
+				<h2>Bookings</h2>
+			</div>
+			<!-- Bookings Table Display -->
+			<div class="table-responsive" ng-show="isBookingsTableVisible">
+			    <table class="table table-hover" >
+	                <thead class="table-bordered" fix-head>
+	                    <tr>
+	                        <th>Name</th>
+	                        <th>Pickup Location</th>
+	                        <th>Drop Off Location</th>
+	                        <th>Vehicle</th>
+	                        <th>Current Passengers</th>
+	                        <th>Action</th>
+	                        <th></th>
+	                    </tr>
+	                </thead>
+	                <tbody>
+	                    <tr ng-repeat="booking in bookings | filter:search">
+	                        <td>{{booking.PassengerName}}</td>
+	                        <td>{{booking.PickupLocation}}</td>
+	                        <td>{{booking.DropOffLocation}}</td>
+	                        <td>{{booking.VehicleId}}</td>
+	                        <td>{{booking.CurrentPassenger}}</td>
+							<td><a class="btn btn-warning" ng-click="showEditBookingForm(booking.Id)" >Edit</a>
+	                        <a class="btn btn-danger" ng-click="removeBooking(booking.Id)" >Delete</a></td>
+	                    </tr>
+	                </tbody>
+	            </table>
+            </div>
+			
+			<!-- Bookings add form -->
+            <div ng-show="isAddBookingFormVisible">
+				<form class="form-horizontal" ng-model="addNewBookingForm" name="addNewBookingForm">
+					<div class="form-group">
+						<label class="control-label col-sm-2">Full Name</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="bookingName" required><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Pickup Location</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="bookingPickup" required><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Drop Off Location</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="bookingDropOff" required><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Vehicle</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="bookingVehicle" required><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">CurrentPassenger</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="bookingCurrentPassenger" required><br/>
+						</div>
+					</div>
+						<input class="btn btn-success" type="submit" ng-disabled="addNewBookingForm.$invalid" ng-click="add()" value="Add">
+				</form>
+			</div>
+			
+			<!-- Bookings edit form -->
+			<div ng-show="isEditBookingFormVisible">
+				<form class="form-horizontal" ng-model="addNewBookingForm">
+					<div class="form-group">
+						<label class="control-label col-sm-2">Full Name</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editBookingName"/><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Pickup Location</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editBookingPickup"/><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Drop Off Location</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editBookingDropOff"/><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Vehicle</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editBookingVehicle"/><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">CurrentPassenger</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editBookingCurrentPassenger"/><br/>
+						</div>
+					</div>
+						<input class="btn btn-success" type="submit" ng-click="editBooking()" value="Add"/>
+						<input class="btn btn-warning" type="submit" ng-click="cancelEditBooking()" value="Cancel"/>
+				</form>
+			</div>
+		
+	</div>
+
+	<!-- Vehicles Page-->
+	<div ng-show="isVehiclesVisible" style="background-color:#fff;">
+		<div class="jumbotron" style="background-color:#fff;">
+			<h2>Vehicles</h2>
+		</div>
+		<!-- Vehicles Table Display -->
+		<div class="table-responsive" ng-show="isVehiclesTableVisible">
+			<table class="table table-hover" >
+	            <thead class="table-bordered" fix-head>
+	                <tr>
+	                    <th>ID</th>
+	                    <th>Make</th>
+	                    <th>Capacity</th>
+	                    <th>Driver</th>
+	                    <th>Registration</th>
+	                    <th>Model</th>
+	                    <th ng-show="contentIsNotVisibleForStaff">Action</th>
+	                    </tr>
+	            </thead>
+	            <tbody>
+	                <tr ng-repeat="vehicle in vehicles | filter:search">
+	                    <td>{{vehicle.Id}}</td>
+	                    <td>{{vehicle.Make}}</td>
+	                    <td>{{vehicle.Capacity}}</td>
+						<td>{{vehicle.Driver}}</td>
+						<td>{{vehicle.Registration}}</td>
+						<td>{{vehicle.Model}}</td>
+						<td><a class="btn btn-warning" ng-show="contentIsNotVisibleForStaff" ng-click="showEditVehicleForm(vehicle.Id)" >Edit</a>
+	                    <a class="btn btn-danger" ng-show="contentIsNotVisibleForStaff" ng-click="removeVehicle(vehicle.Id)" >Delete</a></td>
+	                </tr>
+	            </tbody>
+	        </table>
+        </div>
+		
+		<!-- Vehicles add form -->
+		<div ng-show="isAddVehicleFormVisible">
+				<form class="form-horizontal" ng-model="addNewVehicleForm">
+					<div class="form-group">
+						<label class="control-label col-sm-2">Make</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="vehicleMake" required><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Capacity</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="vehicleCapacity" required><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Driver</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="vehicleDriver" required><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Registration</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="vehicleRegistration" required><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Model</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="vehicleModel" required><br/>
+						</div>
+					</div>
+						<input class="btn btn-success" type="submit" ng-click="addVehicle()" value="Add">
+				</form>
+			</div>
+			
+			<!-- Vehicles edit form -->
+			<div ng-show="isEditVehicleFormVisible">
+				<form class="form-horizontal" ng-model="addNewBookingForm">
+					<div class="form-group">
+						<label class="control-label col-sm-2">Make</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editVehicleMake"/><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Capacity</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editVehicleCapacity"/><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Driver</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editVehicleDriver"/><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Registration</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editVehicleRegistration"/><br/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">Model</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" ng-model="editVehicleModel"/><br/>
+						</div>
+					</div>
+						<input class="btn btn-success" type="submit" ng-click="editVehicle()" value="Add"/>
+						<input class="btn btn-warning" type="submit" ng-click="cancelEditVehicle()" value="Cancel"/>
+				</form>
+			</div>
+	</div>
+	</div>
+	
+		<!-- Footer is visible also for non logged in users-->
+		<footer class="footer panel-footer" style="background-color:#fff;">
+			<div class="container" style="clear:both">
+				<p class="col-sm-6" style="margin:0" > Copyrighted by Patryk Ginter, Rageepan Ravichandran and Luke Henry. Background image copyrighted by wallhaven.cc</p>
+				<a class="btn btn-info" ng-show="isLogoutButtonVisible" ng-click="logout()" style="float:right; margin-right: 50px">Logout</a>
+			</div>
+		</footer>
+
+	</div>
+	
+    <script src="Assets/js/app/app.js"></script>
+    <script src="Assets/js/app/appAssets/appModule.js"></script>
+    <script src="Assets/js/app/appAssets/appController.js"></script>
+ 
+	</body>
+</html>
